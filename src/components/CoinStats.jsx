@@ -1,5 +1,3 @@
-import React from "react";
-
 function CoinStats({ coin }) {
   if (!coin) return null;
 

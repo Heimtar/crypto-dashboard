@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import MarketTicker from "./components/MarketTicker";
 import CoinStats from "./components/CoinStats";
+import CoinChart from './components/CoinChart';
 import MarketTable from "./components/MarketTable";
 import mockData from "./data/mockData.json";
 
@@ -65,6 +66,7 @@ function App() {
               minHeight: "300px",
             }}
           >
+            <CoinChart historyData={activeCoin.history} />
             {/* Временно выведем ID, чтобы видеть, что клик по таблице работает */}
             <h3>Исторический график для: {selectedCoinId.toUpperCase()}</h3>
           </div>

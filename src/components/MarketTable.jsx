@@ -1,5 +1,3 @@
-import React from "react";
-
 function MarketTable({ coins, selectedCoinId, onSelectCoin }) {
   if (!coins || coins.length === 0) return null;
 
