@@ -1,18 +1,18 @@
-// Добавляем хуки useState и useEffect
 import React, { useState, useEffect } from "react";
 import MarketTicker from "./components/MarketTicker";
+// Импортируем нашу новую таблицу
+import MarketTable from "./components/MarketTable";
 import mockData from "./data/mockData.json";
 
 function App() {
-  // Инициализируем тему. По умолчанию светлая 'light'
   const [theme, setTheme] = useState("light");
+  // Заводим стейт для хранения ID выбранной монеты. По умолчанию — первый элемент массива (Биткоин)
+  const [selectedCoinId, setSelectedCoinId] = useState(mockData.coins[0].id);
 
-  // Следим за изменением темы и вешаем атрибут на документ
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // Функция для переключения стейта
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
@@ -21,7 +21,6 @@ function App() {
     <div>
       <MarketTicker globalData={mockData.global} />
 
-      {/* Временная кнопка для теста переключения темы */}
       <main style={{ padding: "20px" }}>
         <div
           style={{
@@ -47,7 +46,6 @@ function App() {
           </button>
         </div>
 
-        {/* Сюда мы сейчас вставим нашу сетку (Grid) */}
         <div
           className="dashboard-grid"
           style={{
@@ -67,10 +65,11 @@ function App() {
               minHeight: "300px",
             }}
           >
-            <h3>Исторический график (Заглушка)</h3>
+            {/* Временно выведем ID, чтобы видеть, что клик по таблице работает */}
+            <h3>Исторический график для: {selectedCoinId.toUpperCase()}</h3>
           </div>
 
-          {/* Правая колонка для быстрой статистики или портфеля */}
+          {/* Правая колонка для быстрой статистики */}
           <div
             style={{
               backgroundColor: "var(--bg-card)",
@@ -80,9 +79,16 @@ function App() {
               minHeight: "300px",
             }}
           >
-            <h3>Статистика актива (Заглушка)</h3>
+            <h3>Статистика актива</h3>
           </div>
         </div>
+
+        {/* Рендерим таблицу под сеткой графика */}
+        <MarketTable
+          coins={mockData.coins}
+          selectedCoinId={selectedCoinId}
+          onSelectCoin={setSelectedCoinId}
+        />
       </main>
     </div>
   );
