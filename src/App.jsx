@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import MarketTicker from "./components/MarketTicker";
-// Импортируем нашу новую таблицу
+import CoinStats from "./components/CoinStats";
 import MarketTable from "./components/MarketTable";
 import mockData from "./data/mockData.json";
 
@@ -16,7 +16,7 @@ function App() {
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
-
+  const activeCoin = mockData.coins.find((c) => c.id === selectedCoinId);
   return (
     <div>
       <MarketTicker globalData={mockData.global} />
@@ -79,6 +79,7 @@ function App() {
               minHeight: "300px",
             }}
           >
+            <CoinStats coin={activeCoin} />
             <h3>Статистика актива</h3>
           </div>
         </div>
