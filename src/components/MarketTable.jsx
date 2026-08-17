@@ -33,10 +33,10 @@ function MarketTable({ coins, selectedCoinId, onSelectCoin }) {
           >
             <th style={{ padding: "12px 8px" }}>Название</th>
             <th style={{ padding: "12px 8px" }}>Тикер</th>
-            <th style={{ padding: "12px 8px", textRight: "right" }}>
+            <th style={{ padding: "12px 8px", textAlign: "right" }}>
               Цена (USD)
             </th>
-            <th style={{ padding: "12px 8px", textRight: "right" }}>24ч (%)</th>
+            <th style={{ padding: "12px 8px", textAlign: "right" }}>24ч (%)</th>
           </tr>
         </thead>
         <tbody>
