@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 function AddAssetModal({ coin, onClose, onSave }) {
-  if (!coin) return null;
-
   // Управляемая форма: количество монет и цена покупки (по умолчанию текущая цена с рынка)
   const [amount, setAmount] = useState("");
   const [buyPrice, setBuyPrice] = useState(coin.price);
+
+  if (!coin) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
