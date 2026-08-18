@@ -1,4 +1,4 @@
-function MarketTable({ coins, selectedCoinId, onSelectCoin }) {
+function MarketTable({ coins, selectedCoinId, onSelectCoin, onOpenModal }) {
   if (!coins || coins.length === 0) return null;
 
   return (
@@ -91,21 +91,21 @@ function MarketTable({ coins, selectedCoinId, onSelectCoin }) {
                   {isPositive ? "+" : ""}
                   {coin.change24h}%
                 </td>
-                <td style={{ padding: '16px 8px', textAlign: 'right' }}>
-                  <button 
+                <td style={{ padding: "16px 8px", textAlign: "right" }}>
+                  <button
                     onClick={(e) => {
                       e.stopPropagation(); // Важно: предотвращаем переключение графика при клике на плюс!
-                      alert(`Добавляем в портфель: ${coin.name}`);
+                      onOpenModal(coin);
                     }}
                     style={{
-                      padding: '4px 10px',
-                      cursor: 'pointer',
-                      backgroundColor: 'var(--accent)',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '4px',
-                      fontWeight: '600',
-                      fontSize: '14px'
+                      padding: "4px 10px",
+                      cursor: "pointer",
+                      backgroundColor: "var(--accent)",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontWeight: "600",
+                      fontSize: "14px",
                     }}
                   >
                     +

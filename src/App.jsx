@@ -4,6 +4,7 @@ import CoinStats from "./components/CoinStats";
 import CoinChart from "./components/CoinChart";
 import MarketTable from "./components/MarketTable";
 import mockData from "./data/mockData.json";
+import AddAssetModal from "./components/AddAssetModal";
 
 function App() {
   // Закладываем ленивую инициализацию портфеля из localStorage
@@ -12,6 +13,7 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [theme, setTheme] = useState("light");
+  const [modalCoin, setModalCoin] = useState(null);
   // Синхронизируем стейт портфеля с localStorage
   useEffect(() => {
     localStorage.setItem("crypto_portfolio", JSON.stringify(portfolio));
@@ -25,6 +27,34 @@ function App() {
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+  const handleAddAsset = (coinId, amount, buyPrice) => {
+    setPortfolio((prev) => {
+      // Ищем, есть ли уже эта монета в портфеле
+      const existingIndex = prev.findIndex((item) => item.id === coinId);
+
+      if (existingIndex > -1) {
+        // Если есть — создаем копию массива и агрегируем (складываем) количество и усредняем цену
+        const updated = [...prev];
+        const existing = updated[existingIndex];
+
+        const totalAmount = existing.amount + amount;
+        // Считаем среднюю цену покупки (математика инвестора)
+        const averagePrice =
+          (existing.buyPrice * existing.amount + buyPrice * amount) /
+          totalAmount;
+
+        updated[existingIndex] = {
+          id: coinId,
+          amount: totalAmount,
+          buyPrice: averagePrice,
+        };
+        return updated;
+      } else {
+        // Если монеты в портфеле еще нет — просто добавляем новый объект
+        return [...prev, { id: coinId, amount, buyPrice }];
+      }
+    });
   };
   const activeCoin = mockData.coins.find((c) => c.id === selectedCoinId);
   return (
@@ -100,7 +130,15 @@ function App() {
           coins={mockData.coins}
           selectedCoinId={selectedCoinId}
           onSelectCoin={setSelectedCoinId}
+          onOpenModal={setModalCoin}
         />
+        {modalCoin && (
+          <AddAssetModal
+            coin={modalCoin}
+            onClose={() => setModalCoin(null)}
+            onSave={handleAddAsset}
+          />
+        )}
       </main>
     </div>
   );
