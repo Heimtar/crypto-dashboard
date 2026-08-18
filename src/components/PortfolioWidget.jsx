@@ -108,8 +108,8 @@ function PortfolioWidget({ portfolio, coins, onRemove }) {
               key={asset.id}
               style={{
                 display: "flex",
-                justifyContent: "space-between",
                 alignItems: "center",
+                gap: "16px",
                 padding: "8px 10px",
                 backgroundColor: "var(--bg-main)",
                 borderRadius: "6px",
@@ -121,7 +121,7 @@ function PortfolioWidget({ portfolio, coins, onRemove }) {
                   {asset.amount} шт.
                 </div>
               </div>
-              <div style={{ textAlign: "right" }}>
+              <div style={{ textAlign: "right", flex: 1 }}>
                 <span style={{ fontSize: "14px", fontWeight: "600" }}>
                   ${formatUSD(asset.currentValue)}
                 </span>
