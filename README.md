@@ -1,16 +1,38 @@
-# React + Vite
+# Финансовый дашборд крипто-портфеля (React MVP)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Интерактивный и автономный аналитический терминал для отслеживания котировок криптовалют и управления инвестиционным портфелем в реальном времени. Третий проект из глобального плана портфолио (уровень Junior+).
 
-Currently, two official plugins are available:
+## Ключевой функционал
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Интерактивный Дашборд**: Двухколоночный Grid-интерфейс в строгом бизнес-стиле для одновременного анализа графиков и рыночной статистики.
+- **Декларативные Графики (Recharts)**: Плавные линейные Area-графики с динамическим расчетом масштаба (`domain`) по осям для наглядного отображения волатильности и переключением таймфреймов (24h / 7d / 30d).
+- **Слой Асинхронных Данных (useCryptoAPI)**: Кастомный хук, полностью изолирующий бизнес-логику, обработку состояний `loading`, сетевых ошибок и принудительного обновления.
+- **Умное Финтех-Кэширование**: Защита от спама запросов (Rate Limiting) с контролем времени жизни кэша (TTL = 2 минуты) для экономии ресурсов сети.
+- **Автономный Симулятор Рынка**: Встроенный реактивный генератор волатильности (±1.2%), имитирующий живые биржевые тики при обновлении данных.
+- **Менеджер Портфеля (LocalStorage CRUD)**: Управление активами (добавление через управляемую модальную форму, авто-агрегация объемов, расчет средней цены покупки инвестора и полное удаление).
+- **Иммутабельная Математика PnL**: Расчет текущей стоимости портфеля и чистой прибыли/убытка (USD / %) в реальном времени через чистые функции `.reduce()` без мутации стейта.
+- **Двухканальная Дизайн-Система**: Мягкая темная и светлая темы, реализованные на чистых CSS-переменных с плавными переходами (`transition`).
 
-## React Compiler
+## Стек технологий
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Фреймворк**: React 18 / 19 (Чистый Context, кастомные хуки)
+- **Сборщик**: Vite + Node.js v24
+- **Визуализация**: Recharts (SVG-графика)
+- **Стилизация**: CSS-переменные, Flexbox, CSS Grid
+- **Хранение данных**: LocalStorage (Ленивая инициализация стейта)
 
-## Expanding the ESLint configuration
+## Архитектура потоков данных
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. `App.jsx` активирует хук `useCryptoAPI` -> Включается лоадер `loading` на 600мс.
+2. Хук генерирует живые котировки -> Данные прокидываются в `MarketTicker`, `MarketTable` и `CoinStats`.
+3. При клике на строку таблицы -> Стейт `selectedCoinId` меняется, график плавно перестраивается.
+4. При клике на `+` -> Открывается управляемая модалка, валидирует числа и через `setPortfolio` обновляет `localStorage`.
+5. `PortfolioWidget` подхватывает изменения, сопоставляет ID с живым рынком и чисто через `.reduce()` выводит PnL.
+
+## Стандарты разработки
+
+Проект разработан в строгом соответствии с современными гайдлайнами:
+
+- Коммиты по стандарту **Conventional Commits** (`feat:`, `fix:`, `style:`, `chore:`).
+- Строгое соблюдение **Rules of Hooks** (вызовы хуков исключительно на верхнем уровне компонентов).
+- Отсутствие мертвого кода (Dead Code) и безопасность замыканий в циклах рендеринга.
