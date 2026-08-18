@@ -25,8 +25,10 @@ export function useCryptoAPI() {
         setLoading(true);
         setError(null);
 
-        // Делаем реальный запрос к CoinGecko API вместо setTimeout и моков
-        const response = await fetch("https://coingecko.com");
+        // Стучимся на свой же прокси-сервер Vite вместо внешнего домена
+        const response = await fetch(
+          "/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana",
+        );
 
         if (!response.ok) {
           throw new Error(
