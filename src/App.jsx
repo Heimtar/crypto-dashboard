@@ -9,7 +9,7 @@ import AddAssetModal from "./components/AddAssetModal";
 
 function App() {
   // Активируем хук API и достаем из него данные, статус загрузки и метод обновления
-  const { data, loading, error, refreshData } = useCryptoAPI();
+  const { data, loading, error, lastUpdated, refreshData } = useCryptoAPI();
   // Закладываем ленивую инициализацию портфеля из localStorage
   const [portfolio, setPortfolio] = useState(() => {
     const saved = localStorage.getItem("crypto_portfolio");
@@ -100,7 +100,11 @@ function App() {
   }
   return (
     <div>
-      <MarketTicker globalData={data.global} />
+      <MarketTicker
+        globalData={data.global}
+        lastUpdated={lastUpdated}
+        onRefresh={refreshData}
+      />
 
       <main style={{ padding: "20px" }}>
         <div

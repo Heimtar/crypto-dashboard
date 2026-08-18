@@ -1,4 +1,4 @@
-function MarketTicker({ globalData }) {
+function MarketTicker({ globalData, lastUpdated, onRefresh }) {
   if (!globalData) return null;
 
   // Проверяем, положительный ли тренд, чтобы выбрать нужный цвет
@@ -41,9 +41,35 @@ function MarketTicker({ globalData }) {
         </div>
       </div>
 
-      {/* Правая часть: Заглушка под статус кэша и тему */}
-      <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>
-        Синхронизировано (Mock)
+      {/* Выводим время последнего обновления и кнопку принудительного обхода кэша */}
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {lastUpdated && (
+          <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>
+            Обновлено: {new Date(lastUpdated).toLocaleTimeString()}
+          </span>
+        )}
+        <button
+          onClick={onRefresh}
+          style={{
+            padding: "4px 10px",
+            cursor: "pointer",
+            backgroundColor: "transparent",
+            color: "var(--text-main)",
+            border: "1px solid var(--border-color)",
+            borderRadius: "4px",
+            fontSize: "12px",
+            fontWeight: "500",
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "var(--bg-main)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "transparent")
+          }
+        >
+          🔄 Обновить
+        </button>
       </div>
     </div>
   );
