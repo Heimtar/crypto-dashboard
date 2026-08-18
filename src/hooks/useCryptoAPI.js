@@ -25,74 +25,75 @@ export function useCryptoAPI() {
         setLoading(true);
         setError(null);
 
-        // Стучимся на свой же прокси-сервер Vite вместо внешнего домена
-        const response = await fetch(
-          "/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana",
-        );
+        // Стучимся на открытое, свободное от CORS и блокировок финтех-зеркало
+        const response = await fetch("https://cryptocompare.com");
 
         if (!response.ok) {
-          throw new Error(
-            `Ошибка сервера: ${response.status} (Превышен лимит запросов?)`,
-          );
+          throw new Error(`Ошибка сервера: ${response.status}`);
         }
 
-        const serverCoins = await response.json();
+        const rawData = await response.json();
+        const displayData = rawData.DISPLAY; // Достаем ветку с отформатированными данными
 
-        // МАЯК: Адаптер. Превращаем плоские данные CoinGecko в нашу структуру, включая историю для графиков
-        const adaptedCoins = serverCoins.map((coin) => {
-          // Так как CoinGecko не отдает историю в базовом эндпоинте, мы генерируем её из текущих данных,
-          // чтобы наши графики Recharts продолжали красиво работать на живых ценах!
-          const basePrice = coin.current_price;
-          const change = coin.price_change_percentage_24h || 0;
-          const pastPrice = basePrice / (1 + change / 100);
+        // Адаптируем ответ нового API под структуру нашего приложения
+        const targetCoins = ["BTC", "ETH", "SOL"];
+        const coinIds = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana" };
+        const coinNames = { BTC: "Bitcoin", ETH: "Ethereum", SOL: "Solana" };
+
+        const adaptedCoins = targetCoins.map((symbol) => {
+          const info = displayData[symbol].USD;
+
+          // Очищаем строки от знаков валют (например, "$64,250" -> 64250.00)
+          const cleanPrice = parseFloat(info.PRICE.replace(/[^\d.]/g, ""));
+          const cleanChange = parseFloat(info.CHANGEPCT24HOUR);
+          const cleanHigh = parseFloat(info.HIGH24HOUR.replace(/[^\d.]/g, ""));
+          const cleanLow = parseFloat(info.LOW24HOUR.replace(/[^\d.]/g, ""));
+          const cleanVolume = parseFloat(
+            info.VOLUME24HOURTO.replace(/[^\d.]/g, ""),
+          );
+
+          const pastPrice = cleanPrice / (1 + cleanChange / 100);
 
           return {
-            id: coin.id,
-            name: coin.name,
-            symbol: coin.symbol.toUpperCase(),
-            price: coin.current_price,
-            change24h: parseFloat(change.toFixed(2)),
-            high24h: coin.high_24h || basePrice,
-            low24h: coin.low_24h || basePrice,
-            volume24h: coin.total_volume || 0,
+            id: coinIds[symbol],
+            name: coinNames[symbol],
+            symbol: symbol,
+            price: cleanPrice,
+            change24h: cleanChange,
+            high24h: cleanHigh,
+            low24h: cleanLow,
+            volume24h: cleanVolume,
             history: {
-              // Эмулируем тренд графика на основе реального суточного изменения цены
               "24h": [
                 pastPrice,
-                pastPrice * 1.005,
-                pastPrice * 0.995,
-                basePrice * 0.998,
-                basePrice,
+                pastPrice * 1.01,
+                pastPrice * 0.99,
+                cleanPrice * 0.995,
+                cleanPrice,
               ],
               "7d": [
-                pastPrice * 0.92,
-                pastPrice * 0.95,
+                pastPrice * 0.93,
+                pastPrice * 0.96,
                 pastPrice * 0.94,
-                pastPrice * 0.98,
-                basePrice,
+                pastPrice * 0.97,
+                cleanPrice,
               ],
               "30d": [
-                pastPrice * 0.85,
-                pastPrice * 0.89,
-                pastPrice * 0.82,
-                pastPrice * 0.95,
-                basePrice,
+                pastPrice * 0.86,
+                pastPrice * 0.88,
+                pastPrice * 0.83,
+                pastPrice * 0.94,
+                cleanPrice,
               ],
             },
           };
         });
 
-        // Собираем финальный объект, полностью повторяющий структуру нашего mockData.json
+        // Собираем финальный объект, идентичный нашей дизайн-системе
         const finalData = {
           global: {
-            // Вычисляем глобальную капу на основе трех наших топ-монет для примера
-            marketCap: adaptedCoins.reduce(
-              (sum, c) => sum + c.volume24h * 5,
-              2450000000000,
-            ),
-            marketCapChange24h: adaptedCoins[0]
-              ? adaptedCoins[0].change24h
-              : 1.5,
+            marketCap: 2450000000000,
+            marketCapChange24h: adaptedCoins[0].change24h, // Берем тренд Биткоина для общей плашки
             btcDominance: 54.2,
           },
           coins: adaptedCoins,
