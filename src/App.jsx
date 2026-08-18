@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import MarketTicker from "./components/MarketTicker";
+import PortfolioWidget from "./components/PortfolioWidget";
 import CoinStats from "./components/CoinStats";
 import CoinChart from "./components/CoinChart";
 import MarketTable from "./components/MarketTable";
@@ -14,6 +15,7 @@ function App() {
   });
   const [theme, setTheme] = useState("light");
   const [modalCoin, setModalCoin] = useState(null);
+  const [activeTab, setActiveTab] = useState("stats");
   // Синхронизируем стейт портфеля с localStorage
   useEffect(() => {
     localStorage.setItem("crypto_portfolio", JSON.stringify(portfolio));
@@ -120,8 +122,64 @@ function App() {
               minHeight: "300px",
             }}
           >
-            <CoinStats coin={activeCoin} />
-            <h3>Статистика актива</h3>
+            {/* Панель кнопок-вкладок (Tabs) */}
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                marginBottom: "20px",
+                borderBottom: "1px solid var(--border-color)",
+                paddingBottom: "10px",
+              }}
+            >
+              <button
+                onClick={() => setActiveTab("stats")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color:
+                    activeTab === "stats"
+                      ? "var(--accent)"
+                      : "var(--text-muted)",
+                  borderBottom:
+                    activeTab === "stats" ? "2px solid var(--accent)" : "none",
+                }}
+              >
+                Статистика
+              </button>
+              <button
+                onClick={() => setActiveTab("portfolio")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color:
+                    activeTab === "portfolio"
+                      ? "var(--accent)"
+                      : "var(--text-muted)",
+                  borderBottom:
+                    activeTab === "portfolio"
+                      ? "2px solid var(--accent)"
+                      : "none",
+                }}
+              >
+                Мой Портфель ({portfolio.length})
+              </button>
+            </div>
+
+            {/* Условный рендер содержимого в зависимости от выбранной вкладки */}
+            {activeTab === "stats" ? (
+              <CoinStats coin={activeCoin} />
+            ) : (
+              <PortfolioWidget portfolio={portfolio} coins={mockData.coins} />
+            )}
           </div>
         </div>
 
