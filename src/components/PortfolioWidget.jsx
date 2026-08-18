@@ -1,4 +1,4 @@
-function PortfolioWidget({ portfolio, coins }) {
+function PortfolioWidget({ portfolio, coins, onRemove }) {
   // Хелпер для форматирования валюты
   const formatUSD = (num) =>
     num.toLocaleString("en-US", {
@@ -138,6 +138,28 @@ function PortfolioWidget({ portfolio, coins }) {
                   {asset.pnlPercent.toFixed(1)}%
                 </div>
               </div>
+              {/* Кнопка быстрого удаления актива из портфеля */}
+              <button
+                onClick={() => onRemove(asset.id)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  fontSize: "18px",
+                  cursor: "pointer",
+                  padding: "0 0 0 12px",
+                  fontWeight: "300",
+                  transition: "color 0.2s ease",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.color = "var(--crypto-down)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.color = "var(--text-muted)")
+                }
+              >
+                ×
+              </button>
             </div>
           );
         })}

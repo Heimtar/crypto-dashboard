@@ -58,6 +58,9 @@ function App() {
       }
     });
   };
+  const handleRemoveAsset = (coinId) => {
+    setPortfolio((prev) => prev.filter((item) => item.id !== coinId));
+  };
   const activeCoin = mockData.coins.find((c) => c.id === selectedCoinId);
   return (
     <div>
@@ -178,7 +181,11 @@ function App() {
             {activeTab === "stats" ? (
               <CoinStats coin={activeCoin} />
             ) : (
-              <PortfolioWidget portfolio={portfolio} coins={mockData.coins} />
+              <PortfolioWidget
+                portfolio={portfolio}
+                coins={mockData.coins}
+                onRemove={handleRemoveAsset}
+              />
             )}
           </div>
         </div>
