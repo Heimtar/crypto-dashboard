@@ -35,6 +35,7 @@ function MarketTable({ coins, selectedCoinId, onSelectCoin }) {
               Цена (USD)
             </th>
             <th style={{ padding: "12px 8px", textAlign: "right" }}>24ч (%)</th>
+            <th style={{ padding: "12px 8px", textAlign: "right" }}>Купить</th>
           </tr>
         </thead>
         <tbody>
@@ -89,6 +90,26 @@ function MarketTable({ coins, selectedCoinId, onSelectCoin }) {
                 >
                   {isPositive ? "+" : ""}
                   {coin.change24h}%
+                </td>
+                <td style={{ padding: '16px 8px', textAlign: 'right' }}>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation(); // Важно: предотвращаем переключение графика при клике на плюс!
+                      alert(`Добавляем в портфель: ${coin.name}`);
+                    }}
+                    style={{
+                      padding: '4px 10px',
+                      cursor: 'pointer',
+                      backgroundColor: 'var(--accent)',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      fontWeight: '600',
+                      fontSize: '14px'
+                    }}
+                  >
+                    +
+                  </button>
                 </td>
               </tr>
             );

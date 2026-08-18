@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
 import MarketTicker from "./components/MarketTicker";
 import CoinStats from "./components/CoinStats";
-import CoinChart from './components/CoinChart';
+import CoinChart from "./components/CoinChart";
 import MarketTable from "./components/MarketTable";
 import mockData from "./data/mockData.json";
 
 function App() {
+  // Закладываем ленивую инициализацию портфеля из localStorage
+  const [portfolio, setPortfolio] = useState(() => {
+    const saved = localStorage.getItem("crypto_portfolio");
+    return saved ? JSON.parse(saved) : [];
+  });
   const [theme, setTheme] = useState("light");
+  // Синхронизируем стейт портфеля с localStorage
+  useEffect(() => {
+    localStorage.setItem("crypto_portfolio", JSON.stringify(portfolio));
+  }, [portfolio]);
   // Заводим стейт для хранения ID выбранной монеты. По умолчанию — первый элемент массива (Биткоин)
   const [selectedCoinId, setSelectedCoinId] = useState(mockData.coins[0].id);
 
