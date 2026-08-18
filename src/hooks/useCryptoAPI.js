@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-//import mockData from "../data/mockData.json";
+import mockData from "../data/mockData.json";
 
 // Время жизни кэша: 2 минуты (в миллисекундах)
 const CACHE_TTL = 2 * 60 * 1000;
@@ -24,79 +24,55 @@ export function useCryptoAPI() {
 
         setLoading(true);
         setError(null);
+        // МАЯК: Имитируем сетевой запрос к серверу с задержкой 600мс
+        await new Promise((resolve) => setTimeout(resolve, 600));
 
-        // Стучимся на открытое, свободное от CORS и блокировок финтех-зеркало
-        const response = await fetch("https://cryptocompare.com");
+        // Функция для случайного колебания цены на рынке (эмуляция реальных торгов)
+        const getRandomVolatility = (basePrice) => {
+          // Случайный процент от -1.2% до +1.2%
+          const percent = (Math.random() * 2.4 - 1.2) / 100;
+          return parseFloat((basePrice * (1 + percent)).toFixed(2));
+        };
 
-        if (!response.ok) {
-          throw new Error(`Ошибка сервера: ${response.status}`);
-        }
+        // МАЯК: Маппим моки, добавляя им живую динамику цены при каждом обновлении
+        const dynamicCoins = mockData.coins.map((coin) => {
+          const livePrice = getRandomVolatility(coin.price);
 
-        const rawData = await response.json();
-        const displayData = rawData.DISPLAY; // Достаем ветку с отформатированными данными
+          // Пересчитываем максимумы и минимумы суток на основе новой живой цены
+          const liveHigh = livePrice > coin.high24h ? livePrice : coin.high24h;
+          const liveLow = livePrice < coin.low24h ? livePrice : coin.low24h;
 
-        // Адаптируем ответ нового API под структуру нашего приложения
-        const targetCoins = ["BTC", "ETH", "SOL"];
-        const coinIds = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana" };
-        const coinNames = { BTC: "Bitcoin", ETH: "Ethereum", SOL: "Solana" };
-
-        const adaptedCoins = targetCoins.map((symbol) => {
-          const info = displayData[symbol].USD;
-
-          // Очищаем строки от знаков валют (например, "$64,250" -> 64250.00)
-          const cleanPrice = parseFloat(info.PRICE.replace(/[^\d.]/g, ""));
-          const cleanChange = parseFloat(info.CHANGEPCT24HOUR);
-          const cleanHigh = parseFloat(info.HIGH24HOUR.replace(/[^\d.]/g, ""));
-          const cleanLow = parseFloat(info.LOW24HOUR.replace(/[^\d.]/g, ""));
-          const cleanVolume = parseFloat(
-            info.VOLUME24HOURTO.replace(/[^\d.]/g, ""),
-          );
-
-          const pastPrice = cleanPrice / (1 + cleanChange / 100);
+          // Пересчитываем прошлую цену для красивого графика
+          const pastPrice = livePrice / (1 + coin.change24h / 100);
 
           return {
-            id: coinIds[symbol],
-            name: coinNames[symbol],
-            symbol: symbol,
-            price: cleanPrice,
-            change24h: cleanChange,
-            high24h: cleanHigh,
-            low24h: cleanLow,
-            volume24h: cleanVolume,
+            ...coin,
+            price: livePrice,
+            high24h: liveHigh,
+            low24h: liveLow,
+            // Перестраиваем массивы истории, чтобы линии графика плавно дергались при обновлении
             history: {
               "24h": [
                 pastPrice,
-                pastPrice * 1.01,
-                pastPrice * 0.99,
-                cleanPrice * 0.995,
-                cleanPrice,
+                pastPrice * 1.002,
+                pastPrice * 0.997,
+                livePrice * 0.999,
+                livePrice,
               ],
-              "7d": [
-                pastPrice * 0.93,
-                pastPrice * 0.96,
-                pastPrice * 0.94,
-                pastPrice * 0.97,
-                cleanPrice,
-              ],
-              "30d": [
-                pastPrice * 0.86,
-                pastPrice * 0.88,
-                pastPrice * 0.83,
-                pastPrice * 0.94,
-                cleanPrice,
-              ],
+              "7d": coin.history["7d"].map((p) => getRandomVolatility(p)),
+              "30d": coin.history["30d"].map((p) => getRandomVolatility(p)),
             },
           };
         });
 
-        // Собираем финальный объект, идентичный нашей дизайн-системе
+        // Собираем итоговую структуру данных
         const finalData = {
           global: {
-            marketCap: 2450000000000,
-            marketCapChange24h: adaptedCoins[0].change24h, // Берем тренд Биткоина для общей плашки
-            btcDominance: 54.2,
+            ...mockData.global,
+            // Глобальная капа тоже слегка колеблется в такт рынку
+            marketCap: getRandomVolatility(mockData.global.marketCap),
           },
-          coins: adaptedCoins,
+          coins: dynamicCoins,
         };
 
         setData(finalData);
