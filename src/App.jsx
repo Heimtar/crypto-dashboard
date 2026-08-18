@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
+import { useCryptoAPI } from "./hooks/useCryptoAPI";
 import MarketTicker from "./components/MarketTicker";
 import PortfolioWidget from "./components/PortfolioWidget";
 import CoinStats from "./components/CoinStats";
 import CoinChart from "./components/CoinChart";
 import MarketTable from "./components/MarketTable";
-import mockData from "./data/mockData.json";
 import AddAssetModal from "./components/AddAssetModal";
 
 function App() {
+  // Активируем хук API и достаем из него данные, статус загрузки и метод обновления
+  const { data, loading, error, refreshData } = useCryptoAPI();
   // Закладываем ленивую инициализацию портфеля из localStorage
   const [portfolio, setPortfolio] = useState(() => {
     const saved = localStorage.getItem("crypto_portfolio");
@@ -21,7 +23,7 @@ function App() {
     localStorage.setItem("crypto_portfolio", JSON.stringify(portfolio));
   }, [portfolio]);
   // Заводим стейт для хранения ID выбранной монеты. По умолчанию — первый элемент массива (Биткоин)
-  const [selectedCoinId, setSelectedCoinId] = useState(mockData.coins[0].id);
+  const [selectedCoinId, setSelectedCoinId] = useState("bitcoin");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -61,10 +63,44 @@ function App() {
   const handleRemoveAsset = (coinId) => {
     setPortfolio((prev) => prev.filter((item) => item.id !== coinId));
   };
-  const activeCoin = mockData.coins.find((c) => c.id === selectedCoinId);
+  // Безопасно ищем активную монету. Если данные еще не загрузились, вернем null
+  const activeCoin = data
+    ? data.coins.find((c) => c.id === selectedCoinId)
+    : null;
+  // Финансовый UI-занавес для обработки асинхронности
+  if (loading) {
+    return (
+      <div
+        style={{
+          color: "var(--text-main)",
+          textAlign: "center",
+          marginTop: "100px",
+          fontSize: "18px",
+          fontWeight: "500",
+        }}
+      >
+        Загрузка рыночных данных...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          color: "var(--crypto-down)",
+          textAlign: "center",
+          marginTop: "100px",
+          fontSize: "18px",
+        }}
+      >
+        Ошибка: {error}
+      </div>
+    );
+  }
   return (
     <div>
-      <MarketTicker globalData={mockData.global} />
+      <MarketTicker globalData={data.global} />
 
       <main style={{ padding: "20px" }}>
         <div
@@ -183,7 +219,7 @@ function App() {
             ) : (
               <PortfolioWidget
                 portfolio={portfolio}
-                coins={mockData.coins}
+                coins={data.coins}
                 onRemove={handleRemoveAsset}
               />
             )}
@@ -192,7 +228,7 @@ function App() {
 
         {/* Рендерим таблицу под сеткой графика */}
         <MarketTable
-          coins={mockData.coins}
+          coins={data.coins}
           selectedCoinId={selectedCoinId}
           onSelectCoin={setSelectedCoinId}
           onOpenModal={setModalCoin}
